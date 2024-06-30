@@ -15,6 +15,9 @@ class SolverExpression:
     
     def __mul__(self, other):
         return SolverExpression(sub_expressions=[self, other], operand="mul")
+    
+    def __truediv__(self, other):
+        return SolverExpression(sub_expressions=[self, other], operand="div")
 
     def __str__(self):
         if self.operand == "add":
@@ -29,6 +32,11 @@ class SolverExpression:
         
         elif self.operand == "mul":
             return " * ".join(
+                [str(subexpression) for subexpression in self.sub_expressions]
+            )
+        
+        elif self.operand == "div":
+            return " / ".join(
                 [str(subexpression) for subexpression in self.sub_expressions]
             )
 
@@ -71,6 +79,13 @@ class SolverExpression:
                         f"Multiplied {value1} with {value2} to get {mul_value}"
                     )
                     return True, True, False, mul_value, type(self.sub_expressions[-1])(mul_value)
+                
+                elif self.operand == "div":
+                    div_value = value1 / value2
+                    info_logger.info(
+                        f"Divided {value1} by {value2} to get {div_value}"
+                    )
+                    return True, True, False, div_value, type(self.sub_expressions[-1])(div_value)
             else:
                 pass
 

@@ -1,7 +1,7 @@
 from solver_lib.solver_term import SolverTerm
 
 
-class SolverInt(SolverTerm):
+class SolverConstant(SolverTerm):
     def __init__(self, value):
         super().__init__(value=value)
 
