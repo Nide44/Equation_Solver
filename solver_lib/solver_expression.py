@@ -12,6 +12,9 @@ class SolverExpression:
 
     def __sub__(self, other):
         return SolverExpression(sub_expressions=[self, other], operand="sub")
+    
+    def __mul__(self, other):
+        return SolverExpression(sub_expressions=[self, other], operand="mul")
 
     def __str__(self):
         if self.operand == "add":
@@ -21,6 +24,11 @@ class SolverExpression:
 
         elif self.operand == "sub":
             return " - ".join(
+                [str(subexpression) for subexpression in self.sub_expressions]
+            )
+        
+        elif self.operand == "mul":
+            return " * ".join(
                 [str(subexpression) for subexpression in self.sub_expressions]
             )
 
@@ -49,12 +57,20 @@ class SolverExpression:
                     info_logger.info(f"Added {value1} and {value2} to get {add_value}")
                     
                     return True, True, False, add_value, type(self.sub_expressions[-1])(add_value)
+                
                 elif self.operand == "sub":
                     sub_value = value1 - value2
                     info_logger.info(
                         f"Subtracted {value2} from {value1} to get {sub_value}"
                     )
                     return True, True, False, sub_value, type(self.sub_expressions[-1])(sub_value)
+                
+                elif self.operand == "mul":
+                    mul_value = value1 * value2
+                    info_logger.info(
+                        f"Multiplied {value1} with {value2} to get {mul_value}"
+                    )
+                    return True, True, False, mul_value, type(self.sub_expressions[-1])(mul_value)
             else:
                 pass
 
