@@ -8,5 +8,5 @@ class SolverInt(SolverTerm):
     def __str__(self):
         return str(self.value)
 
-    def reduce(self):
-        return True, False, self.value
+    def reduce(self, _):
+        return True, False, False, self.value, self

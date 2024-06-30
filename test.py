@@ -59,3 +59,26 @@ def test_chained_subtraction():
     result = eq.solve(x)
 
     assert result.name == x.name and result.value == 3
+
+
+def test_addition_subtraction_mixed():
+    a = SolverInt(9)
+    b = SolverInt(4)
+    c = SolverInt(2)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a + b - c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 11
+
+    lhs = x
+    rhs = a - b + c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 7

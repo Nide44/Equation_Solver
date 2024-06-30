@@ -8,5 +8,5 @@ class SolverVariable(SolverTerm):
     def __str__(self):
         return str(self.name)
 
-    def reduce(self):
-        return True, True, self.name
+    def reduce(self, _):
+        return True, False, True, self.name, self

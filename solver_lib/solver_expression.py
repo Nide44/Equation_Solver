@@ -1,3 +1,5 @@
+from solver_lib.logger import info_logger
+
 class SolverExpression:
     def __init__(self, value=None, name=None, sub_expressions=None, operand=None):
         self.value = value
@@ -22,23 +24,37 @@ class SolverExpression:
                 [str(subexpression) for subexpression in self.sub_expressions]
             )
 
-    def reduce(self):
+    def reduce(self, top_parent):
         sub_exp_solved_list = []
         sub_exp_var_list = []
         sub_exp_value_list = []
 
-        for sub_expression in self.sub_expressions:
-            sub_exp_solved, sub_exp_var, sub_exp_value = sub_expression.reduce()
+        for sub_exp_index, sub_expression in enumerate(self.sub_expressions):
+            sub_exp_solved, sub_exp_updated, sub_exp_var, sub_exp_value, new_sub_exp = (
+                sub_expression.reduce(top_parent)
+            )
             sub_exp_solved_list.append(sub_exp_solved)
             sub_exp_var_list.append(sub_exp_var)
             sub_exp_value_list.append(sub_exp_value)
+            if sub_exp_updated:
+                self.sub_expressions[sub_exp_index] = new_sub_exp
+                info_logger.info("Updated equation: " + str(top_parent))
 
         if all(sub_exp_solved_list):
             if not any(sub_exp_var_list):
+                value1 = sub_exp_value_list[0]
+                value2 = sub_exp_value_list[1]
                 if self.operand == "add":
-                    return True, False, sub_exp_value_list[0] + sub_exp_value_list[1]
+                    add_value = value1 + value2
+                    info_logger.info(f"Added {value1} and {value2} to get {add_value}")
+                    
+                    return True, True, False, add_value, type(self.sub_expressions[-1])(add_value)
                 elif self.operand == "sub":
-                    return True, False, sub_exp_value_list[0] - sub_exp_value_list[1]
+                    sub_value = value1 - value2
+                    info_logger.info(
+                        f"Subtracted {value2} from {value1} to get {sub_value}"
+                    )
+                    return True, True, False, sub_value, type(self.sub_expressions[-1])(sub_value)
             else:
                 pass
 
