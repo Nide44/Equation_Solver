@@ -8,9 +8,17 @@ class SolverExpression:
     def __add__(self, other):
         return SolverExpression(sub_expressions=[self, other], operand="add")
 
+    def __sub__(self, other):
+        return SolverExpression(sub_expressions=[self, other], operand="sub")
+
     def __str__(self):
         if self.operand == "add":
             return " + ".join(
+                [str(subexpression) for subexpression in self.sub_expressions]
+            )
+
+        elif self.operand == "sub":
+            return " - ".join(
                 [str(subexpression) for subexpression in self.sub_expressions]
             )
 
@@ -28,8 +36,9 @@ class SolverExpression:
         if all(sub_exp_solved_list):
             if not any(sub_exp_var_list):
                 if self.operand == "add":
-                    return True, False, sum(sub_exp_value_list)
-
+                    return True, False, sub_exp_value_list[0] + sub_exp_value_list[1]
+                elif self.operand == "sub":
+                    return True, False, sub_exp_value_list[0] - sub_exp_value_list[1]
             else:
                 pass
 

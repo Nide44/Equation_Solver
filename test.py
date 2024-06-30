@@ -30,3 +30,32 @@ def test_chained_addition():
     result = eq.solve(x)
 
     assert result.name == x.name and result.value == 12
+
+
+def test_single_subtraction():
+    a = SolverInt(8)
+    b = SolverInt(6)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a - b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 2
+
+
+def test_chained_subtraction():
+    a = SolverInt(9)
+    b = SolverInt(4)
+    c = SolverInt(2)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a - b - c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 3
