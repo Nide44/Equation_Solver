@@ -1,5 +1,6 @@
 from solver_lib.logger import info_logger
 
+
 class SolverExpression:
     def __init__(self, value=None, name=None, sub_expressions=None, operand=None):
         self.value = value
@@ -12,12 +13,15 @@ class SolverExpression:
 
     def __sub__(self, other):
         return SolverExpression(sub_expressions=[self, other], operand="sub")
-    
+
     def __mul__(self, other):
         return SolverExpression(sub_expressions=[self, other], operand="mul")
-    
+
     def __truediv__(self, other):
         return SolverExpression(sub_expressions=[self, other], operand="div")
+
+    def __neg__(self):
+        return SolverExpression(sub_expressions=[SolverConstant(-1), self], operand="mul")
 
     def __str__(self):
         if self.operand == "add":
@@ -29,12 +33,12 @@ class SolverExpression:
             return " - ".join(
                 [str(subexpression) for subexpression in self.sub_expressions]
             )
-        
+
         elif self.operand == "mul":
             return " * ".join(
                 [str(subexpression) for subexpression in self.sub_expressions]
             )
-        
+
         elif self.operand == "div":
             return " / ".join(
                 [str(subexpression) for subexpression in self.sub_expressions]
@@ -63,31 +67,80 @@ class SolverExpression:
                 if self.operand == "add":
                     add_value = value1 + value2
                     info_logger.info(f"Added {value1} and {value2} to get {add_value}")
-                    
-                    return True, True, False, add_value, type(self.sub_expressions[-1])(add_value)
-                
+
+                    return (
+                        True,
+                        True,
+                        False,
+                        add_value,
+                        SolverConstant(add_value),
+                    )
+
                 elif self.operand == "sub":
                     sub_value = value1 - value2
                     info_logger.info(
                         f"Subtracted {value2} from {value1} to get {sub_value}"
                     )
-                    return True, True, False, sub_value, type(self.sub_expressions[-1])(sub_value)
-                
+                    return (
+                        True,
+                        True,
+                        False,
+                        sub_value,
+                        SolverConstant(sub_value),
+                    )
+
                 elif self.operand == "mul":
                     mul_value = value1 * value2
                     info_logger.info(
                         f"Multiplied {value1} with {value2} to get {mul_value}"
                     )
-                    return True, True, False, mul_value, type(self.sub_expressions[-1])(mul_value)
-                
+                    return (
+                        True,
+                        True,
+                        False,
+                        mul_value,
+                        SolverConstant(mul_value),
+                    )
+
                 elif self.operand == "div":
                     div_value = value1 / value2
-                    info_logger.info(
-                        f"Divided {value1} by {value2} to get {div_value}"
+                    info_logger.info(f"Divided {value1} by {value2} to get {div_value}")
+                    return (
+                        True,
+                        True,
+                        False,
+                        div_value,
+                        SolverConstant(div_value),
                     )
-                    return True, True, False, div_value, type(self.sub_expressions[-1])(div_value)
             else:
                 pass
 
         else:
             pass
+
+
+class SolverTerm(SolverExpression):
+    def __init__(self, value=None, name=None):
+        super().__init__(value=value, name=name)
+
+
+class SolverConstant(SolverTerm):
+    def __init__(self, value):
+        super().__init__(value=value)
+
+    def __str__(self):
+        return str(self.value)
+
+    def reduce(self, _):
+        return True, False, False, self.value, self
+
+
+class SolverVariable(SolverTerm):
+    def __init__(self, name):
+        super().__init__(name=name)
+
+    def __str__(self):
+        return str(self.name)
+
+    def reduce(self, _):
+        return True, False, True, self.name, self

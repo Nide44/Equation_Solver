@@ -1,8 +1,8 @@
 import pytest
 
 from solver_lib.solver_equation import SolverEquation
-from solver_lib.solver_constant import SolverConstant
-from solver_lib.solver_variable import SolverVariable
+from solver_lib.solver_elements import SolverConstant
+from solver_lib.solver_elements import SolverVariable
 
 
 def test_single_addition():
@@ -188,3 +188,29 @@ def test_addition_division_mixed():
     result = eq.solve(x)
 
     assert result.name == x.name and result.value == 11
+
+
+def test_minus_sign():
+    a = SolverConstant(-4)
+    b = SolverConstant(3)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a / b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and pytest.approx(result.value, abs=0.01) == -1.33
+
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = -a / b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and pytest.approx(result.value, abs=0.01) == -1.33

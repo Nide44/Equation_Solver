@@ -1,7 +1,7 @@
 import sys, os
 
 from solver_lib.logger import error_logger, info_logger
-from solver_lib.solver_variable import SolverVariable
+from solver_lib.solver_elements import SolverVariable
 
 
 class SolverEquation:
