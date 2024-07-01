@@ -2,47 +2,113 @@ from solver_lib.logger import info_logger
 
 
 class SolverExpression:
-    def __init__(self, value=None, name=None, sub_expressions=None, operand=None):
+    def __init__(
+        self, value=None, name=None, sub_expressions=[], operand=None, level=0
+    ):
         self.value = value
         self.name = name
         self.sub_expressions = sub_expressions
         self.operand = operand
+        self.level = level
 
     def __add__(self, other):
-        return SolverExpression(sub_expressions=[self, other], operand="add")
+        old_level = self.level
+        new_exp = SolverExpression(
+            sub_expressions=[self, other], operand="add", level=old_level
+        )
+        new_exp.deepen_sublevels(False)
+        return new_exp
 
     def __sub__(self, other):
-        return SolverExpression(sub_expressions=[self, other], operand="sub")
+        old_level = self.level
+        new_exp = SolverExpression(
+            sub_expressions=[self, other], operand="sub", level=old_level
+        )
+        new_exp.deepen_sublevels(False)
+        return new_exp
 
     def __mul__(self, other):
-        return SolverExpression(sub_expressions=[self, other], operand="mul")
+        old_level = self.level
+        new_exp = SolverExpression(
+            sub_expressions=[self, other], operand="mul", level=old_level
+        )
+        new_exp.deepen_sublevels(False)
+        return new_exp
 
     def __truediv__(self, other):
-        return SolverExpression(sub_expressions=[self, other], operand="div")
+        old_level = self.level
+        new_exp = SolverExpression(
+            sub_expressions=[self, other], operand="div", level=old_level
+        )
+        new_exp.deepen_sublevels(False)
+        return new_exp
 
     def __neg__(self):
-        return SolverConstant(-1 * self.value)
+        new_exp = SolverConstant(-1 * self.value, level=self.level)
+        return new_exp
 
     def __str__(self):
         if self.operand == "add":
-            return " + ".join(
-                [str(subexpression) for subexpression in self.sub_expressions]
-            )
+            if self.level > 0:
+                return (
+                    "("
+                    + " + ".join(
+                        [str(sub_expression) for sub_expression in self.sub_expressions]
+                    )
+                    + ")"
+                )
+            else:
+                return " + ".join(
+                    [str(sub_expression) for sub_expression in self.sub_expressions]
+                )
 
         elif self.operand == "sub":
-            return " - ".join(
-                [str(subexpression) for subexpression in self.sub_expressions]
-            )
+            if self.level > 0:
+                return (
+                    "("
+                    + " - ".join(
+                        [str(sub_expression) for sub_expression in self.sub_expressions]
+                    )
+                    + ")"
+                )
+            else:
+                return " - ".join(
+                    [str(sub_expression) for sub_expression in self.sub_expressions]
+                )
 
         elif self.operand == "mul":
-            return " * ".join(
-                [str(subexpression) for subexpression in self.sub_expressions]
-            )
+            if self.level > 0:
+                return (
+                    "("
+                    + " * ".join(
+                        [str(sub_expression) for sub_expression in self.sub_expressions]
+                    )
+                    + ")"
+                )
+            else:
+                return " * ".join(
+                    [str(sub_expression) for sub_expression in self.sub_expressions]
+                )
 
         elif self.operand == "div":
-            return " / ".join(
-                [str(subexpression) for subexpression in self.sub_expressions]
-            )
+            if self.level > 0:
+                return (
+                    "("
+                    + " / ".join(
+                        [str(sub_expression) for sub_expression in self.sub_expressions]
+                    )
+                    + ")"
+                )
+            else:
+                return " / ".join(
+                    [str(sub_expression) for sub_expression in self.sub_expressions]
+                )
+
+    def deepen_sublevels(self, update_self):
+        for sub_expression in self.sub_expressions:
+            sub_expression.deepen_sublevels(True)
+        if update_self:
+            self.level += 1
 
     def reduce(self, top_parent):
         sub_exp_solved_list = []
@@ -59,6 +125,8 @@ class SolverExpression:
             if sub_exp_updated:
                 self.sub_expressions[sub_exp_index] = new_sub_exp
                 info_logger.info("Updated equation: " + str(top_parent))
+            if sub_exp_updated or isinstance(sub_expression, SolverConstant):
+                sub_expression.level = 0
 
         if all(sub_exp_solved_list):
             if not any(sub_exp_var_list):
@@ -67,13 +135,12 @@ class SolverExpression:
                 if self.operand == "add":
                     add_value = value1 + value2
                     info_logger.info(f"Added {value1} and {value2} to get {add_value}")
-
                     return (
                         True,
                         True,
                         False,
                         add_value,
-                        SolverConstant(add_value),
+                        SolverConstant(add_value, level=self.level),
                     )
 
                 elif self.operand == "sub":
@@ -86,7 +153,7 @@ class SolverExpression:
                         True,
                         False,
                         sub_value,
-                        SolverConstant(sub_value),
+                        SolverConstant(sub_value, level=self.level),
                     )
 
                 elif self.operand == "mul":
@@ -99,7 +166,7 @@ class SolverExpression:
                         True,
                         False,
                         mul_value,
-                        SolverConstant(mul_value),
+                        SolverConstant(mul_value, level=self.level),
                     )
 
                 elif self.operand == "div":
@@ -110,7 +177,7 @@ class SolverExpression:
                         True,
                         False,
                         div_value,
-                        SolverConstant(div_value),
+                        SolverConstant(div_value, level=self.level),
                     )
             else:
                 pass
@@ -120,13 +187,13 @@ class SolverExpression:
 
 
 class SolverTerm(SolverExpression):
-    def __init__(self, value=None, name=None):
-        super().__init__(value=value, name=name)
+    def __init__(self, value=None, name=None, level=0):
+        super().__init__(value=value, name=name, level=level)
 
 
 class SolverConstant(SolverTerm):
-    def __init__(self, value):
-        super().__init__(value=value)
+    def __init__(self, value, level=0):
+        super().__init__(value=value, level=level)
 
     def __str__(self):
         return str(self.value)
@@ -136,8 +203,8 @@ class SolverConstant(SolverTerm):
 
 
 class SolverVariable(SolverTerm):
-    def __init__(self, name):
-        super().__init__(name=name)
+    def __init__(self, name, level=0):
+        super().__init__(name=name, level=level)
 
     def __str__(self):
         return str(self.name)

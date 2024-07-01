@@ -214,3 +214,26 @@ def test_minus_sign():
     result = eq.solve(x)
 
     assert result.name == x.name and pytest.approx(result.value, abs=0.01) == -1.33
+
+
+def test_parentheses():
+    a = SolverConstant(-4)
+    b = SolverConstant(3)
+    c = SolverConstant(5)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a + b * c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 11
+
+    lhs = x
+    rhs = (a + b) * c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == -5
