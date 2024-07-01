@@ -21,7 +21,7 @@ class SolverExpression:
         return SolverExpression(sub_expressions=[self, other], operand="div")
 
     def __neg__(self):
-        return SolverExpression(sub_expressions=[SolverConstant(-1), self], operand="mul")
+        return SolverConstant(-1 * self.value)
 
     def __str__(self):
         if self.operand == "add":
