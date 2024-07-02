@@ -239,6 +239,43 @@ def test_parentheses():
     assert result.name == x.name and result.value == -5
 
 
+def test_single_exponentiation():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a**b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 64
+
+
+def test_chained_exponentiation():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = x
+    rhs = a**b**c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 262144
+
+    lhs = x
+    rhs = (a**b)**c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 4096
+
+
 def test_switch_addition():
     a = SolverConstant(4)
     b = SolverConstant(3)

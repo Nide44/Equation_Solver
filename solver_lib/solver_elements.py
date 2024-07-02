@@ -47,6 +47,16 @@ class SolverExpression:
         new_exp = SolverConstant(-1 * self.value, level=self.level)
         return new_exp
 
+    def __pow__(self, other):
+        if not isinstance(other, int) or other < 0:
+            raise Exception("Only natural exponents are allowed in exponentiation")
+        old_level = self.level
+        new_exp = SolverExpression(
+            sub_expressions=[self, other], operand="pow", level=old_level
+        )
+        new_exp.increase_sublevels(False)
+        return new_exp
+
     def __str__(self):
         if self.operand == "add":
             if self.level > 0:
@@ -101,6 +111,20 @@ class SolverExpression:
                 )
             else:
                 return " / ".join(
+                    [str(sub_expression) for sub_expression in self.sub_expressions]
+                )
+
+        elif self.operand == "pow":
+            if self.level > 0:
+                return (
+                    "("
+                    + " ^ ".join(
+                        [str(sub_expression) for sub_expression in self.sub_expressions]
+                    )
+                    + ")"
+                )
+            else:
+                return " ^ ".join(
                     [str(sub_expression) for sub_expression in self.sub_expressions]
                 )
 
@@ -184,6 +208,19 @@ class SolverExpression:
                         False,
                         div_value,
                         SolverConstant(div_value, level=self.level),
+                    )
+
+                elif self.operand == "pow":
+                    pow_value = value1**value2
+                    info_logger.info(
+                        f"Took {value1} to the power of {value2} to get {pow_value}"
+                    )
+                    return (
+                        True,
+                        True,
+                        False,
+                        pow_value,
+                        SolverConstant(pow_value, level=self.level),
                     )
 
         return False, False, True, None, self
