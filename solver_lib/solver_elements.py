@@ -48,7 +48,7 @@ class SolverExpression:
         return new_exp
 
     def __pow__(self, other):
-        if not isinstance(other, int) or other < 0:
+        if other.value and (not isinstance(other.value, int) or other.value < 0):
             raise Exception("Only natural exponents are allowed in exponentiation")
         old_level = self.level
         new_exp = SolverExpression(

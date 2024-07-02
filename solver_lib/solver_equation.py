@@ -82,40 +82,49 @@ class SolverEquation:
     def solve(self, variable):
         try:
             info_logger.info("Solving: " + str(self))
-            lhs_updated = True
-            rhs_updated = True
-            switch_lhs_to_rhs = True
+            lhs_updated = [True]
+            rhs_updated = [True]
+            switch_lhs_to_rhs = [True]
             # switch_rhs_to_lhs = True
-            lhs_solved = False
-            rhs_solved = False
+            lhs_solved = [False]
+            rhs_solved = [False]
 
-            while rhs_updated or lhs_updated or switch_lhs_to_rhs:
-                rhs_solved, rhs_updated, rhs_has_var, _, new_rhs_exp = self.rhs.reduce(
-                    self
-                )
-                if rhs_updated:
-                    self.rhs = new_rhs_exp
-                    info_logger.info("Current form: " + str(self))
+            sub_equations = [self]
 
-                lhs_solved, lhs_updated, lhs_has_var, _, new_lhs_exp = self.lhs.reduce(
-                    self
-                )
-                if lhs_updated:
-                    self.lhs = new_lhs_exp
-                    info_logger.info("Current form: " + str(self))
+            while any(rhs_updated) or any(lhs_updated) or any(switch_lhs_to_rhs):
+                for sub_equation_index, sub_equation in enumerate(sub_equations):
+                    single_rhs_solved, single_rhs_updated, single_rhs_has_var, _, single_new_rhs_exp = sub_equation.rhs.reduce(
+                        sub_equation
+                    )
+                    if single_rhs_updated:
+                        sub_equation.rhs = single_new_rhs_exp
+                        info_logger.info("Current form: " + str(sub_equation))
 
-                switch_lhs_to_rhs = self.switch_left_to_right()
-                if switch_lhs_to_rhs:
-                    info_logger.info("Current form: " + str(self))
+                    single_lhs_solved, single_lhs_updated, single_lhs_has_var, _, single_new_lhs_exp = sub_equation.lhs.reduce(
+                        sub_equation
+                    )
+                    if single_lhs_updated:
+                        sub_equation.lhs = single_new_lhs_exp
+                        info_logger.info("Current form: " + str(sub_equation))
+
+                    single_switch_lhs_to_rhs = sub_equation.switch_left_to_right()
+                    if single_switch_lhs_to_rhs:
+                        info_logger.info("Current form: " + str(sub_equation))
+
+                    rhs_updated[sub_equation_index] = single_rhs_updated
+                    lhs_updated[sub_equation_index] = single_lhs_updated
+                    switch_lhs_to_rhs[sub_equation_index] = single_switch_lhs_to_rhs
+                    rhs_solved[sub_equation_index] = single_rhs_solved
+                    lhs_solved[sub_equation_index] = single_lhs_solved
 
             if (
-                rhs_solved
-                and lhs_solved
-                and isinstance(self.lhs, SolverVariable)
-                and isinstance(self.rhs, SolverConstant)
+                all(rhs_solved)
+                and all(lhs_solved)
+                and all([isinstance(sub_equation.lhs, SolverVariable) for sub_equation in sub_equations])
+                and all([isinstance(sub_equation.rhs, SolverConstant) for sub_equation in sub_equations])
             ):
                 new_variable = SolverVariable(variable.name)
-                new_variable.value = self.rhs.value
+                new_variable.value = [sub_equation.rhs.value for sub_equation in sub_equations]
                 info_logger.info("\n")
 
             else:

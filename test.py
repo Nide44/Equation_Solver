@@ -16,7 +16,7 @@ def test_single_addition():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 7
+    assert result.name == x.name and sorted(result.value) == [3 + 4]
 
 
 def test_chained_addition():
@@ -31,7 +31,7 @@ def test_chained_addition():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 12
+    assert result.name == x.name and sorted(result.value) == [3 + 4 + 5]
 
 
 def test_single_subtraction():
@@ -45,7 +45,7 @@ def test_single_subtraction():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 2
+    assert result.name == x.name and sorted(result.value) == [8 - 6]
 
 
 def test_chained_subtraction():
@@ -60,7 +60,7 @@ def test_chained_subtraction():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 3
+    assert result.name == x.name and sorted(result.value) == [9 - 4 - 2]
 
 
 def test_addition_subtraction_mixed():
@@ -75,7 +75,7 @@ def test_addition_subtraction_mixed():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 11
+    assert result.name == x.name and sorted(result.value) == [9 + 4 - 2]
 
     lhs = x
     rhs = a - b + c
@@ -83,7 +83,7 @@ def test_addition_subtraction_mixed():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 7
+    assert result.name == x.name and sorted(result.value) == [9 - 4 + 2]
 
 
 def test_single_multiplication():
@@ -97,7 +97,7 @@ def test_single_multiplication():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 12
+    assert result.name == x.name and sorted(result.value) == [3 * 4]
 
 
 def test_chained_multiplication():
@@ -112,7 +112,7 @@ def test_chained_multiplication():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 60
+    assert result.name == x.name and sorted(result.value) == [3 * 4 * 5]
 
 
 def test_addition_multiplication_mixed():
@@ -127,7 +127,7 @@ def test_addition_multiplication_mixed():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 38
+    assert result.name == x.name and sorted(result.value) == [9 * 4 + 2]
 
     lhs = x
     rhs = a + b * c
@@ -135,7 +135,7 @@ def test_addition_multiplication_mixed():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 17
+    assert result.name == x.name and sorted(result.value) == [9 + 4 * 2]
 
 
 def test_single_division():
@@ -149,7 +149,7 @@ def test_single_division():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and pytest.approx(result.value, abs=0.01) == 1.33
+    assert result.name == x.name and [pytest.approx(value, abs=0.01) for value in result.value] == [4 / 3]
 
 
 def test_chained_division():
@@ -164,7 +164,7 @@ def test_chained_division():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 2
+    assert result.name == x.name and sorted(result.value) == [12 / 2 / 3]
 
 
 def test_addition_division_mixed():
@@ -179,7 +179,7 @@ def test_addition_division_mixed():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 4.25
+    assert result.name == x.name and sorted(result.value) == [9 / 4 + 2]
 
     lhs = x
     rhs = a + b / c
@@ -187,7 +187,7 @@ def test_addition_division_mixed():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 11
+    assert result.name == x.name and sorted(result.value) == [9 + 4 / 2]
 
 
 def test_minus_sign():
@@ -201,7 +201,7 @@ def test_minus_sign():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and pytest.approx(result.value, abs=0.01) == -1.33
+    assert result.name == x.name and [pytest.approx(value, abs=0.01) for value in result.value] == [-4 / 3]
 
     a = SolverConstant(4)
     b = SolverConstant(3)
@@ -213,7 +213,7 @@ def test_minus_sign():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and pytest.approx(result.value, abs=0.01) == -1.33
+    assert result.name == x.name and [pytest.approx(value, abs=0.01) for value in result.value] == [-4 / 3]
 
 
 def test_parentheses():
@@ -228,7 +228,7 @@ def test_parentheses():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 11
+    assert result.name == x.name and sorted(result.value) == [-4 + 3 * 5]
 
     lhs = x
     rhs = (a + b) * c
@@ -236,7 +236,7 @@ def test_parentheses():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == -5
+    assert result.name == x.name and sorted(result.value) == [(-4 + 3) * 5]
 
 
 def test_single_exponentiation():
@@ -250,7 +250,7 @@ def test_single_exponentiation():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 64
+    assert result.name == x.name and sorted(result.value) == [4**3]
 
 
 def test_chained_exponentiation():
@@ -265,15 +265,15 @@ def test_chained_exponentiation():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 262144
+    assert result.name == x.name and sorted(result.value) == [4**3**2]
 
     lhs = x
-    rhs = (a**b)**c
+    rhs = (a**b) ** c
 
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 4096
+    assert result.name == x.name and sorted(result.value) == [(4**3) ** 2]
 
 
 def test_switch_addition():
@@ -287,7 +287,7 @@ def test_switch_addition():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == -1
+    assert result.name == x.name and sorted(result.value) == [3 - 4]
 
 
 def test_switch_subtraction():
@@ -301,7 +301,7 @@ def test_switch_subtraction():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 7
+    assert result.name == x.name and sorted(result.value) == [4 + 3]
 
 
 def test_switch_multiplication():
@@ -315,13 +315,12 @@ def test_switch_multiplication():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 0.75
+    assert result.name == x.name and sorted(result.value) == [3 / 4]
 
 
 def test_switch_division():
     a = SolverConstant(4)
     b = SolverConstant(3)
-    c = SolverConstant(2)
     x = SolverVariable("X")
 
     lhs = x / a
@@ -330,7 +329,7 @@ def test_switch_division():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 12
+    assert result.name == x.name and sorted(result.value) == [4 * 3]
 
 
 def test_switch_addition_chained_left():
@@ -345,7 +344,7 @@ def test_switch_addition_chained_left():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == -5
+    assert result.name == x.name and sorted(result.value) == [2 - 4 - 3]
 
 
 def test_switch_subtraction_chained_left():
@@ -360,7 +359,7 @@ def test_switch_subtraction_chained_left():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 1
+    assert result.name == x.name and sorted(result.value) == [2 - 4 + 3]
 
 
 def test_switch_multiplication_chained_left():
@@ -375,7 +374,7 @@ def test_switch_multiplication_chained_left():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 1 / 6
+    assert result.name == x.name and sorted(result.value) == [1 / 6]
 
 
 def test_switch_division_chained_left():
@@ -390,4 +389,4 @@ def test_switch_division_chained_left():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and result.value == 2 * 3 / 4
+    assert result.name == x.name and sorted(result.value) == [2 * 3 / 4]
