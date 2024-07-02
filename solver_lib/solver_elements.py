@@ -16,7 +16,7 @@ class SolverExpression:
         new_exp = SolverExpression(
             sub_expressions=[self, other], operand="add", level=old_level
         )
-        new_exp.deepen_sublevels(False)
+        new_exp.increase_sublevels(False)
         return new_exp
 
     def __sub__(self, other):
@@ -24,7 +24,7 @@ class SolverExpression:
         new_exp = SolverExpression(
             sub_expressions=[self, other], operand="sub", level=old_level
         )
-        new_exp.deepen_sublevels(False)
+        new_exp.increase_sublevels(False)
         return new_exp
 
     def __mul__(self, other):
@@ -32,7 +32,7 @@ class SolverExpression:
         new_exp = SolverExpression(
             sub_expressions=[self, other], operand="mul", level=old_level
         )
-        new_exp.deepen_sublevels(False)
+        new_exp.increase_sublevels(False)
         return new_exp
 
     def __truediv__(self, other):
@@ -40,7 +40,7 @@ class SolverExpression:
         new_exp = SolverExpression(
             sub_expressions=[self, other], operand="div", level=old_level
         )
-        new_exp.deepen_sublevels(False)
+        new_exp.increase_sublevels(False)
         return new_exp
 
     def __neg__(self):
@@ -104,11 +104,17 @@ class SolverExpression:
                     [str(sub_expression) for sub_expression in self.sub_expressions]
                 )
 
-    def deepen_sublevels(self, update_self):
+    def increase_sublevels(self, update_self):
         for sub_expression in self.sub_expressions:
-            sub_expression.deepen_sublevels(True)
+            sub_expression.increase_sublevels(True)
         if update_self:
             self.level += 1
+
+    def decrease_sublevels(self, update_self):
+        for sub_expression in self.sub_expressions:
+            sub_expression.decrease_sublevels(True)
+        if update_self:
+            self.level -= 1
 
     def reduce(self, top_parent):
         sub_exp_solved_list = []
@@ -179,11 +185,8 @@ class SolverExpression:
                         div_value,
                         SolverConstant(div_value, level=self.level),
                     )
-            else:
-                pass
 
-        else:
-            pass
+        return False, False, True, None, self
 
 
 class SolverTerm(SolverExpression):

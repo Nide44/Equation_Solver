@@ -237,3 +237,120 @@ def test_parentheses():
     result = eq.solve(x)
 
     assert result.name == x.name and result.value == -5
+
+
+def test_switch_addition():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    x = SolverVariable("X")
+
+    lhs = x + a
+    rhs = b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == -1
+
+
+def test_switch_subtraction():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    x = SolverVariable("X")
+
+    lhs = x - a
+    rhs = b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 7
+
+
+def test_switch_multiplication():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    x = SolverVariable("X")
+
+    lhs = x * a
+    rhs = b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 0.75
+
+
+def test_switch_division():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = x / a
+    rhs = b
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 12
+
+
+def test_switch_addition_chained_left():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = a + b + x
+    rhs = c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == -5
+
+
+def test_switch_subtraction_chained_left():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = a - b + x
+    rhs = c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 1
+
+
+def test_switch_multiplication_chained_left():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = a * b * x
+    rhs = c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 1 / 6
+
+
+def test_switch_division_chained_left():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = a / b * x
+    rhs = c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and result.value == 2 * 3 / 4
