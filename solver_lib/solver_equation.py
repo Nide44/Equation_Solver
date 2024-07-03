@@ -93,18 +93,23 @@ class SolverEquation:
 
             while any(rhs_updated) or any(lhs_updated) or any(switch_lhs_to_rhs):
                 for sub_equation_index, sub_equation in enumerate(sub_equations):
-                    single_rhs_solved, single_rhs_updated, single_rhs_has_var, _, single_new_rhs_exp = sub_equation.rhs.reduce(
+                    single_rhs_solved, single_rhs_updated, single_rhs_has_var, single_new_rhs_exp, print_update = sub_equation.rhs.reduce(
                         sub_equation
                     )
                     if single_rhs_updated:
                         sub_equation.rhs = single_new_rhs_exp
+
+                    if print_update:
                         info_logger.info("Current form: " + str(sub_equation))
 
-                    single_lhs_solved, single_lhs_updated, single_lhs_has_var, _, single_new_lhs_exp = sub_equation.lhs.reduce(
+                    single_lhs_solved, single_lhs_updated, single_lhs_has_var, single_new_lhs_exp, print_update = sub_equation.lhs.reduce(
                         sub_equation
                     )
+
                     if single_lhs_updated:
                         sub_equation.lhs = single_new_lhs_exp
+
+                    if print_update:
                         info_logger.info("Current form: " + str(sub_equation))
 
                     single_switch_lhs_to_rhs = sub_equation.switch_left_to_right()

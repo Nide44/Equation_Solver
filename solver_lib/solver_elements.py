@@ -1,47 +1,40 @@
+from solver_lib.globals import operand_sign_mapping
+
 from solver_lib.logger import info_logger
+from solver_lib.settings import SHOW_DECIMALS
+from solver_lib.utils import Utils
 
 
 class SolverExpression:
     def __init__(
-        self, value=None, name=None, sub_expressions=[], operand=None, level=0
+        self,
+        value=None,
+        name=None,
+        sub_expressions=[],
+        operand=None,
+        level=0,
+        numerator=None,
+        denominator=None,
     ):
         self.value = value
+        self.numerator = numerator
+        self.denominator = denominator
         self.name = name
         self.sub_expressions = sub_expressions
         self.operand = operand
         self.level = level
 
     def __add__(self, other):
-        old_level = self.level
-        new_exp = SolverExpression(
-            sub_expressions=[self, other], operand="add", level=old_level
-        )
-        new_exp.increase_sublevels(False)
-        return new_exp
+        return self.create_new_expression(other, "add")
 
     def __sub__(self, other):
-        old_level = self.level
-        new_exp = SolverExpression(
-            sub_expressions=[self, other], operand="sub", level=old_level
-        )
-        new_exp.increase_sublevels(False)
-        return new_exp
+        return self.create_new_expression(other, "sub")
 
     def __mul__(self, other):
-        old_level = self.level
-        new_exp = SolverExpression(
-            sub_expressions=[self, other], operand="mul", level=old_level
-        )
-        new_exp.increase_sublevels(False)
-        return new_exp
+        return self.create_new_expression(other, "mul")
 
     def __truediv__(self, other):
-        old_level = self.level
-        new_exp = SolverExpression(
-            sub_expressions=[self, other], operand="div", level=old_level
-        )
-        new_exp.increase_sublevels(False)
-        return new_exp
+        return self.create_new_expression(other, "div")
 
     def __neg__(self):
         new_exp = SolverConstant(-1 * self.value, level=self.level)
@@ -50,83 +43,24 @@ class SolverExpression:
     def __pow__(self, other):
         if other.value and (not isinstance(other.value, int) or other.value < 0):
             raise Exception("Only natural exponents are allowed in exponentiation")
+
+        return self.create_new_expression(other, "pow")
+
+    def __str__(self):
+        return self.stringify_single_expression()
+
+    def create_new_expression(self, other, operand):
         old_level = self.level
         new_exp = SolverExpression(
-            sub_expressions=[self, other], operand="pow", level=old_level
+            sub_expressions=[self, other], operand=operand, level=old_level
         )
         new_exp.increase_sublevels(False)
         return new_exp
 
-    def __str__(self):
-        if self.operand == "add":
-            if self.level > 0:
-                return (
-                    "("
-                    + " + ".join(
-                        [str(sub_expression) for sub_expression in self.sub_expressions]
-                    )
-                    + ")"
-                )
-            else:
-                return " + ".join(
-                    [str(sub_expression) for sub_expression in self.sub_expressions]
-                )
-
-        elif self.operand == "sub":
-            if self.level > 0:
-                return (
-                    "("
-                    + " - ".join(
-                        [str(sub_expression) for sub_expression in self.sub_expressions]
-                    )
-                    + ")"
-                )
-            else:
-                return " - ".join(
-                    [str(sub_expression) for sub_expression in self.sub_expressions]
-                )
-
-        elif self.operand == "mul":
-            if self.level > 0:
-                return (
-                    "("
-                    + " * ".join(
-                        [str(sub_expression) for sub_expression in self.sub_expressions]
-                    )
-                    + ")"
-                )
-            else:
-                return " * ".join(
-                    [str(sub_expression) for sub_expression in self.sub_expressions]
-                )
-
-        elif self.operand == "div":
-            if self.level > 0:
-                return (
-                    "("
-                    + " / ".join(
-                        [str(sub_expression) for sub_expression in self.sub_expressions]
-                    )
-                    + ")"
-                )
-            else:
-                return " / ".join(
-                    [str(sub_expression) for sub_expression in self.sub_expressions]
-                )
-
-        elif self.operand == "pow":
-            if self.level > 0:
-                return (
-                    "("
-                    + " ^ ".join(
-                        [str(sub_expression) for sub_expression in self.sub_expressions]
-                    )
-                    + ")"
-                )
-            else:
-                return " ^ ".join(
-                    [str(sub_expression) for sub_expression in self.sub_expressions]
-                )
+    def stringify_single_expression(self):
+        return (" " + operand_sign_mapping[self.operand] + " ").join(
+            [str(sub_expression) for sub_expression in self.sub_expressions]
+        )
 
     def increase_sublevels(self, update_self):
         for sub_expression in self.sub_expressions:
@@ -143,25 +77,31 @@ class SolverExpression:
     def reduce(self, top_parent):
         sub_exp_solved_list = []
         sub_exp_var_list = []
-        sub_exp_value_list = []
 
         for sub_exp_index, sub_expression in enumerate(self.sub_expressions):
-            sub_exp_solved, sub_exp_updated, sub_exp_var, sub_exp_value, new_sub_exp = (
+            sub_exp_solved, sub_exp_updated, sub_exp_var, new_sub_exp, print_update = (
                 sub_expression.reduce(top_parent)
             )
             sub_exp_solved_list.append(sub_exp_solved)
             sub_exp_var_list.append(sub_exp_var)
-            sub_exp_value_list.append(sub_exp_value)
             if sub_exp_updated:
                 self.sub_expressions[sub_exp_index] = new_sub_exp
+
+            if print_update:
                 info_logger.info("Updated equation: " + str(top_parent))
+
             if sub_exp_updated or isinstance(sub_expression, SolverConstant):
                 sub_expression.level = 0
 
         if all(sub_exp_solved_list):
             if not any(sub_exp_var_list):
-                value1 = sub_exp_value_list[0]
-                value2 = sub_exp_value_list[1]
+                value1 = self.sub_expressions[0].value
+                value2 = self.sub_expressions[1].value
+                numerator1 = self.sub_expressions[0].numerator
+                numerator2 = self.sub_expressions[1].numerator
+                denominator1 = self.sub_expressions[0].denominator
+                denominator2 = self.sub_expressions[1].denominator
+
                 if self.operand == "add":
                     add_value = value1 + value2
                     info_logger.info(f"Added {value1} and {value2} to get {add_value}")
@@ -169,8 +109,8 @@ class SolverExpression:
                         True,
                         True,
                         False,
-                        add_value,
                         SolverConstant(add_value, level=self.level),
+                        True
                     )
 
                 elif self.operand == "sub":
@@ -182,12 +122,19 @@ class SolverExpression:
                         True,
                         True,
                         False,
-                        sub_value,
                         SolverConstant(sub_value, level=self.level),
+                        True
                     )
 
                 elif self.operand == "mul":
                     mul_value = value1 * value2
+
+                    new_numerator = numerator1 * numerator2
+                    new_denominator = denominator1 * denominator2
+                    gcd = Utils.calculate_gcd(new_numerator, new_denominator)
+                    new_numerator = int(new_numerator / gcd)
+                    new_denominator = int(new_denominator / gcd)
+
                     info_logger.info(
                         f"Multiplied {value1} with {value2} to get {mul_value}"
                     )
@@ -195,23 +142,50 @@ class SolverExpression:
                         True,
                         True,
                         False,
-                        mul_value,
-                        SolverConstant(mul_value, level=self.level),
+                        SolverConstant(
+                            mul_value,
+                            level=self.level,
+                            numerator=new_numerator,
+                            denominator=new_denominator
+                        ),
+                        True
                     )
 
                 elif self.operand == "div":
                     div_value = value1 / value2
-                    info_logger.info(f"Divided {value1} by {value2} to get {div_value}")
+
+                    new_numerator = numerator1 * denominator2
+                    new_denominator = numerator2 * denominator1
+                    gcd = Utils.calculate_gcd(new_numerator, new_denominator)
+                    new_numerator = int(new_numerator / gcd)
+                    new_denominator = int(new_denominator / gcd)
+                    if new_denominator == 1:
+                        info_logger.info(f"Divided {value1} by {value2} to get {div_value}")
+                        print_update = True
+                    else:
+                        print_update = False
                     return (
                         True,
                         True,
                         False,
-                        div_value,
-                        SolverConstant(div_value, level=self.level),
+                        SolverConstant(
+                            div_value,
+                            level=self.level,
+                            numerator=new_numerator,
+                            denominator=new_denominator
+                        ),
+                        print_update
                     )
 
                 elif self.operand == "pow":
                     pow_value = value1**value2
+
+                    new_numerator = numerator1**value2
+                    new_denominator = denominator1**value2
+                    gcd = Utils.calculate_gcd(new_numerator, new_denominator)
+                    new_numerator = int(new_numerator / gcd)
+                    new_denominator = int(new_denominator / gcd)
+
                     info_logger.info(
                         f"Took {value1} to the power of {value2} to get {pow_value}"
                     )
@@ -219,35 +193,68 @@ class SolverExpression:
                         True,
                         True,
                         False,
-                        pow_value,
-                        SolverConstant(pow_value, level=self.level),
+                        SolverConstant(
+                            pow_value,
+                            level=self.level,
+                            numerator=new_numerator,
+                            denominator=new_denominator
+                        ),
+                        True
                     )
 
-        return False, False, True, None, self
+        return False, False, True, self, False
 
 
 class SolverTerm(SolverExpression):
-    def __init__(self, value=None, name=None, level=0):
-        super().__init__(value=value, name=name, level=level)
+    def __init__(
+        self,
+        value=None,
+        name=None,
+        level=0,
+        numerator=None,
+        denominator=1
+    ):
+        super().__init__(
+            value=value,
+            name=name,
+            level=level,
+            numerator=numerator,
+            denominator=denominator
+        )
 
 
 class SolverConstant(SolverTerm):
-    def __init__(self, value, level=0):
-        super().__init__(value=value, level=level)
+    def __init__(
+        self, value, level=0, numerator=None, denominator=None
+    ):
+        numerator = value if numerator == None else numerator
+        denominator = 1 if denominator == None else denominator
+        super().__init__(
+            value=value,
+            level=level,
+            numerator=numerator,
+            denominator=denominator
+        )
 
     def __str__(self):
-        return str(self.value)
+        if SHOW_DECIMALS or self.denominator == 1:
+            return str(self.value)
+        else:
+            if self.level != 0 and self.denominator != 1:
+                return "(" + str(self.numerator) + " / " + str(self.denominator) + ")"
+            else:
+                return str(self.numerator) + " / " + str(self.denominator)
 
     def reduce(self, _):
-        return True, False, False, self.value, self
+        return True, False, False, self, False
 
 
 class SolverVariable(SolverTerm):
-    def __init__(self, name, level=0):
+    def __init__(self, name, level=0, fraction_parentheses=False):
         super().__init__(name=name, level=level)
 
     def __str__(self):
         return str(self.name)
 
     def reduce(self, _):
-        return True, False, True, self.name, self
+        return True, False, True, self, False

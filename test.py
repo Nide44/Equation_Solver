@@ -149,7 +149,7 @@ def test_single_division():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and [pytest.approx(value, abs=0.01) for value in result.value] == [4 / 3]
+    assert result.name == x.name and sorted(result.value) == [4 / 3]
 
 
 def test_chained_division():
@@ -201,7 +201,7 @@ def test_minus_sign():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and [pytest.approx(value, abs=0.01) for value in result.value] == [-4 / 3]
+    assert result.name == x.name and sorted(result.value) == [-4 / 3]
 
     a = SolverConstant(4)
     b = SolverConstant(3)
@@ -213,7 +213,7 @@ def test_minus_sign():
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and [pytest.approx(value, abs=0.01) for value in result.value] == [-4 / 3]
+    assert result.name == x.name and sorted(result.value) == [-4 / 3]
 
 
 def test_parentheses():
