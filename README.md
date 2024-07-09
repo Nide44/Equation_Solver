@@ -1,2 +1,2 @@
-# Equation_Solver
-Repository to create an equation solver
+# Linear_Equation_Solver
+Repository to create a linear equation solver
