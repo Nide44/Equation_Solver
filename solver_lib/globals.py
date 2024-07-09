@@ -1,1 +1,1 @@
-operand_sign_mapping = {"add": "+", "sub": "-", "mul": "*", "div": "/", "pow": "^"}
+operator_sign_mapping = {"add": "+", "sub": "-", "mul": "*", "div": "/", "pow": "^"}

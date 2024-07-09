@@ -15,8 +15,8 @@ class SolverEquation:
     def switch_left_to_right(self):
         for sub_exp_index, sub_expression in enumerate(self.lhs.sub_expressions):
             if isinstance(sub_expression, SolverConstant):
-                original_operand = self.lhs.operand
-                include_original_operand = True if sub_exp_index == 1 else False
+                original_operator = self.lhs.operator
+                include_original_operator = True if sub_exp_index == 1 else False
                 # LHS
                 remaining_sub_exp = self.lhs.sub_expressions[1 - sub_exp_index]
                 remaining_sub_exp.decrease_sublevels(True)
@@ -24,54 +24,54 @@ class SolverEquation:
 
                 # RHS
                 self.rhs.increase_sublevels(True)
-                if original_operand == "add":
+                if original_operator == "add":
                     self.rhs = SolverExpression(
-                        sub_expressions=[self.rhs, sub_expression], operand="sub"
+                        sub_expressions=[self.rhs, sub_expression], operator="sub"
                     )
                     (
                         info_logger.info(
                             f"Switched '+ {sub_expression.value}' from the left to the right side"
                         )
-                        if include_original_operand
+                        if include_original_operator
                         else info_logger.info(
                             f"Switched '{sub_expression.value}' from the left to the right side"
                         )
                     )
-                elif original_operand == "sub":
+                elif original_operator == "sub":
                     self.rhs = SolverExpression(
-                        sub_expressions=[self.rhs, sub_expression], operand="add"
+                        sub_expressions=[self.rhs, sub_expression], operator="add"
                     )
                     (
                         info_logger.info(
                             f"Switched '- {sub_expression.value}' from the left to the right side"
                         )
-                        if include_original_operand
+                        if include_original_operator
                         else info_logger.info(
                             f"Switched '{sub_expression.value}' from the left to the right side"
                         )
                     )
-                elif original_operand == "mul":
+                elif original_operator == "mul":
                     self.rhs = SolverExpression(
-                        sub_expressions=[self.rhs, sub_expression], operand="div"
+                        sub_expressions=[self.rhs, sub_expression], operator="div"
                     )
                     (
                         info_logger.info(
                             f"Switched '* {sub_expression.value}' from the left to the right side"
                         )
-                        if include_original_operand
+                        if include_original_operator
                         else info_logger.info(
                             f"Switched '{sub_expression.value}' from the left to the right side"
                         )
                     )
-                elif original_operand == "div":
+                elif original_operator == "div":
                     self.rhs = SolverExpression(
-                        sub_expressions=[self.rhs, sub_expression], operand="mul"
+                        sub_expressions=[self.rhs, sub_expression], operator="mul"
                     )
                     (
                         info_logger.info(
                             f"Switched '/ {sub_expression.value}' from the left to the right side"
                         )
-                        if include_original_operand
+                        if include_original_operator
                         else info_logger.info(
                             f"Switched '{sub_expression.value}' from the left to the right side"
                         )
@@ -93,18 +93,26 @@ class SolverEquation:
 
             while any(rhs_updated) or any(lhs_updated) or any(switch_lhs_to_rhs):
                 for sub_equation_index, sub_equation in enumerate(sub_equations):
-                    single_rhs_solved, single_rhs_updated, single_rhs_has_var, single_new_rhs_exp, print_update = sub_equation.rhs.reduce(
-                        sub_equation
-                    )
+                    (
+                        single_rhs_solved,
+                        single_rhs_updated,
+                        single_rhs_has_var,
+                        single_new_rhs_exp,
+                        print_update,
+                    ) = sub_equation.rhs.reduce(sub_equation)
                     if single_rhs_updated:
                         sub_equation.rhs = single_new_rhs_exp
 
                     if print_update:
                         info_logger.info("Current form: " + str(sub_equation))
 
-                    single_lhs_solved, single_lhs_updated, single_lhs_has_var, single_new_lhs_exp, print_update = sub_equation.lhs.reduce(
-                        sub_equation
-                    )
+                    (
+                        single_lhs_solved,
+                        single_lhs_updated,
+                        single_lhs_has_var,
+                        single_new_lhs_exp,
+                        print_update,
+                    ) = sub_equation.lhs.reduce(sub_equation)
 
                     if single_lhs_updated:
                         sub_equation.lhs = single_new_lhs_exp
@@ -125,11 +133,23 @@ class SolverEquation:
             if (
                 all(rhs_solved)
                 and all(lhs_solved)
-                and all([isinstance(sub_equation.lhs, SolverVariable) for sub_equation in sub_equations])
-                and all([isinstance(sub_equation.rhs, SolverConstant) for sub_equation in sub_equations])
+                and all(
+                    [
+                        isinstance(sub_equation.lhs, SolverVariable)
+                        for sub_equation in sub_equations
+                    ]
+                )
+                and all(
+                    [
+                        isinstance(sub_equation.rhs, SolverConstant)
+                        for sub_equation in sub_equations
+                    ]
+                )
             ):
                 new_variable = SolverVariable(variable.name)
-                new_variable.value = [sub_equation.rhs.value for sub_equation in sub_equations]
+                new_variable.value = [
+                    sub_equation.rhs.value for sub_equation in sub_equations
+                ]
                 info_logger.info("\n")
 
             else:

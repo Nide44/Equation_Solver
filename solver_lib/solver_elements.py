@@ -1,4 +1,4 @@
-from solver_lib.globals import operand_sign_mapping
+from solver_lib.globals import operator_sign_mapping
 
 from solver_lib.logger import info_logger
 from solver_lib.settings import SHOW_DECIMALS
@@ -11,7 +11,7 @@ class SolverExpression:
         value=None,
         name=None,
         sub_expressions=[],
-        operand=None,
+        operator=None,
         level=0,
         numerator=None,
         denominator=None,
@@ -21,7 +21,7 @@ class SolverExpression:
         self.denominator = denominator
         self.name = name
         self.sub_expressions = sub_expressions
-        self.operand = operand
+        self.operator = operator
         self.level = level
 
     def __add__(self, other):
@@ -49,16 +49,16 @@ class SolverExpression:
     def __str__(self):
         return self.stringify_single_expression()
 
-    def create_new_expression(self, other, operand):
+    def create_new_expression(self, other, operator):
         old_level = self.level
         new_exp = SolverExpression(
-            sub_expressions=[self, other], operand=operand, level=old_level
+            sub_expressions=[self, other], operator=operator, level=old_level
         )
         new_exp.increase_sublevels(False)
         return new_exp
 
     def stringify_single_expression(self):
-        return (" " + operand_sign_mapping[self.operand] + " ").join(
+        return (" " + operator_sign_mapping[self.operator] + " ").join(
             [str(sub_expression) for sub_expression in self.sub_expressions]
         )
 
@@ -102,7 +102,7 @@ class SolverExpression:
                 denominator1 = self.sub_expressions[0].denominator
                 denominator2 = self.sub_expressions[1].denominator
 
-                if self.operand == "add":
+                if self.operator == "add":
                     add_value = value1 + value2
                     info_logger.info(f"Added {value1} and {value2} to get {add_value}")
                     return (
@@ -110,10 +110,10 @@ class SolverExpression:
                         True,
                         False,
                         SolverConstant(add_value, level=self.level),
-                        True
+                        True,
                     )
 
-                elif self.operand == "sub":
+                elif self.operator == "sub":
                     sub_value = value1 - value2
                     info_logger.info(
                         f"Subtracted {value2} from {value1} to get {sub_value}"
@@ -123,10 +123,10 @@ class SolverExpression:
                         True,
                         False,
                         SolverConstant(sub_value, level=self.level),
-                        True
+                        True,
                     )
 
-                elif self.operand == "mul":
+                elif self.operator == "mul":
                     mul_value = value1 * value2
 
                     new_numerator = numerator1 * numerator2
@@ -146,12 +146,12 @@ class SolverExpression:
                             mul_value,
                             level=self.level,
                             numerator=new_numerator,
-                            denominator=new_denominator
+                            denominator=new_denominator,
                         ),
-                        True
+                        True,
                     )
 
-                elif self.operand == "div":
+                elif self.operator == "div":
                     div_value = value1 / value2
 
                     new_numerator = numerator1 * denominator2
@@ -160,7 +160,9 @@ class SolverExpression:
                     new_numerator = int(new_numerator / gcd)
                     new_denominator = int(new_denominator / gcd)
                     if new_denominator == 1:
-                        info_logger.info(f"Divided {value1} by {value2} to get {div_value}")
+                        info_logger.info(
+                            f"Divided {value1} by {value2} to get {div_value}"
+                        )
                         print_update = True
                     else:
                         print_update = False
@@ -172,12 +174,12 @@ class SolverExpression:
                             div_value,
                             level=self.level,
                             numerator=new_numerator,
-                            denominator=new_denominator
+                            denominator=new_denominator,
                         ),
-                        print_update
+                        print_update,
                     )
 
-                elif self.operand == "pow":
+                elif self.operator == "pow":
                     pow_value = value1**value2
 
                     new_numerator = numerator1**value2
@@ -197,43 +199,31 @@ class SolverExpression:
                             pow_value,
                             level=self.level,
                             numerator=new_numerator,
-                            denominator=new_denominator
+                            denominator=new_denominator,
                         ),
-                        True
+                        True,
                     )
 
         return False, False, True, self, False
 
 
 class SolverTerm(SolverExpression):
-    def __init__(
-        self,
-        value=None,
-        name=None,
-        level=0,
-        numerator=None,
-        denominator=1
-    ):
+    def __init__(self, value=None, name=None, level=0, numerator=None, denominator=1):
         super().__init__(
             value=value,
             name=name,
             level=level,
             numerator=numerator,
-            denominator=denominator
+            denominator=denominator,
         )
 
 
 class SolverConstant(SolverTerm):
-    def __init__(
-        self, value, level=0, numerator=None, denominator=None
-    ):
+    def __init__(self, value, level=0, numerator=None, denominator=None):
         numerator = value if numerator == None else numerator
         denominator = 1 if denominator == None else denominator
         super().__init__(
-            value=value,
-            level=level,
-            numerator=numerator,
-            denominator=denominator
+            value=value, level=level, numerator=numerator, denominator=denominator
         )
 
     def __str__(self):
