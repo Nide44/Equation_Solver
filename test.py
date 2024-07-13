@@ -332,7 +332,7 @@ def test_switch_division():
     assert result.name == x.name and sorted(result.value) == [4 * 3]
 
 
-def test_switch_addition_chained_left():
+def test_switch_addition_chained():
     a = SolverConstant(4)
     b = SolverConstant(3)
     c = SolverConstant(2)
@@ -346,23 +346,39 @@ def test_switch_addition_chained_left():
 
     assert result.name == x.name and sorted(result.value) == [2 - 4 - 3]
 
-
-def test_switch_subtraction_chained_left():
-    a = SolverConstant(4)
-    b = SolverConstant(3)
-    c = SolverConstant(2)
-    x = SolverVariable("X")
-
-    lhs = a - b + x
+    lhs = x + a + b
     rhs = c
 
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and sorted(result.value) == [2 - 4 + 3]
+    assert result.name == x.name and sorted(result.value) == [2 - 4 - 3]
 
 
-def test_switch_multiplication_chained_left():
+def test_switch_subtraction_chained():
+    a = SolverConstant(4)
+    b = SolverConstant(3)
+    c = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = -a - b + x
+    rhs = c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and sorted(result.value) == [2 + 4 + 3]
+
+    lhs = x - a - b
+    rhs = c
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and sorted(result.value) == [2 + 4 + 3]
+
+
+def test_switch_multiplication_chained():
     a = SolverConstant(4)
     b = SolverConstant(3)
     c = SolverConstant(2)
@@ -376,17 +392,34 @@ def test_switch_multiplication_chained_left():
 
     assert result.name == x.name and sorted(result.value) == [1 / 6]
 
-
-def test_switch_division_chained_left():
-    a = SolverConstant(4)
-    b = SolverConstant(3)
-    c = SolverConstant(2)
-    x = SolverVariable("X")
-
-    lhs = a / b * x
+    lhs = x * a * b
     rhs = c
 
     eq = SolverEquation(lhs, rhs)
     result = eq.solve(x)
 
-    assert result.name == x.name and sorted(result.value) == [2 * 3 / 4]
+    assert result.name == x.name and sorted(result.value) == [1 / 6]
+
+
+def test_switch_division_chained():
+    a = SolverConstant(1)
+    b = SolverConstant(4)
+    c = SolverConstant(3)
+    d = SolverConstant(2)
+    x = SolverVariable("X")
+
+    lhs = a / b / c * x
+    rhs = d
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and sorted(result.value) == [2 * 3 * 4]
+
+    lhs = x / b / c
+    rhs = d
+
+    eq = SolverEquation(lhs, rhs)
+    result = eq.solve(x)
+
+    assert result.name == x.name and sorted(result.value) == [2 * 3 * 4]
