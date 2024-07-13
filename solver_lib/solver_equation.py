@@ -30,11 +30,11 @@ class SolverEquation:
                     )
                     (
                         info_logger.info(
-                            f"Switched '+ {sub_expression.value}' from the left to the right side"
+                            f"Switched '+ {sub_expression}' from the left to the right side"
                         )
                         if include_original_operator
                         else info_logger.info(
-                            f"Switched '{sub_expression.value}' from the left to the right side"
+                            f"Switched '{sub_expression}' from the left to the right side"
                         )
                     )
                 elif original_operator == "sub":
@@ -43,11 +43,11 @@ class SolverEquation:
                     )
                     (
                         info_logger.info(
-                            f"Switched '- {sub_expression.value}' from the left to the right side"
+                            f"Switched '- {sub_expression}' from the left to the right side"
                         )
                         if include_original_operator
                         else info_logger.info(
-                            f"Switched '{sub_expression.value}' from the left to the right side"
+                            f"Switched '{sub_expression}' from the left to the right side"
                         )
                     )
                 elif original_operator == "mul":
@@ -56,11 +56,11 @@ class SolverEquation:
                     )
                     (
                         info_logger.info(
-                            f"Switched '* {sub_expression.value}' from the left to the right side"
+                            f"Switched '* {sub_expression}' from the left to the right side"
                         )
                         if include_original_operator
                         else info_logger.info(
-                            f"Switched '{sub_expression.value}' from the left to the right side"
+                            f"Switched '{sub_expression}' from the left to the right side"
                         )
                     )
                 elif original_operator == "div":
@@ -69,11 +69,11 @@ class SolverEquation:
                     )
                     (
                         info_logger.info(
-                            f"Switched '/ {sub_expression.value}' from the left to the right side"
+                            f"Switched '/ {sub_expression}' from the left to the right side"
                         )
                         if include_original_operator
                         else info_logger.info(
-                            f"Switched '{sub_expression.value}' from the left to the right side"
+                            f"Switched '{sub_expression}' from the left to the right side"
                         )
                     )
                 return True

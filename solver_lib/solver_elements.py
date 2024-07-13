@@ -1,8 +1,8 @@
+import math
+
 from solver_lib.globals import operator_sign_mapping
-
 from solver_lib.logger import info_logger
-from solver_lib.utils import Utils
-
+from solver_lib.settings import NB_DECIMALS
 
 class SolverExpression:
     def __init__(
@@ -169,14 +169,14 @@ class SolverConstant(SolverTerm):
         super().__init__(value=value, level=level)
 
     def __str__(self):
-        return str(self.value)
+        return f"{self.value:.{NB_DECIMALS}f}".rstrip(".0")
 
     def reduce(self, _):
         return True, False, False, self, False
 
 
 class SolverVariable(SolverTerm):
-    def __init__(self, name, level=0, fraction_parentheses=False):
+    def __init__(self, name, level=0):
         super().__init__(name=name, level=level)
 
     def __str__(self):
