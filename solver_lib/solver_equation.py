@@ -100,6 +100,7 @@ class SolverEquation:
                         single_new_rhs_exp,
                         print_update,
                     ) = sub_equation.rhs.reduce(sub_equation)
+
                     if single_rhs_updated:
                         sub_equation.rhs = single_new_rhs_exp
 
