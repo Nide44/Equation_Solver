@@ -4,6 +4,7 @@ from solver_lib.globals import operator_sign_mapping
 from solver_lib.logger import info_logger
 from solver_lib.settings import NB_DECIMALS
 
+
 class SolverExpression:
     def __init__(
         self,
@@ -95,64 +96,71 @@ class SolverExpression:
 
                 if self.operator == "add":
                     add_value = value1 + value2
-                    info_logger.info(f"Added {value1} and {value2} to get {add_value}")
+                    new_constant = SolverConstant(add_value, level=self.level)
+                    info_logger.info(
+                        f"Added {value1} and {value2} to get {new_constant}"
+                    )
                     return (
                         True,
                         True,
                         False,
-                        SolverConstant(add_value, level=self.level),
+                        new_constant,
                         True,
                     )
 
                 elif self.operator == "sub":
                     sub_value = value1 - value2
+                    new_constant = SolverConstant(sub_value, level=self.level)
                     info_logger.info(
-                        f"Subtracted {value2} from {value1} to get {sub_value}"
+                        f"Subtracted {value2} from {value1} to get {new_constant}"
                     )
                     return (
                         True,
                         True,
                         False,
-                        SolverConstant(sub_value, level=self.level),
+                        new_constant,
                         True,
                     )
 
                 elif self.operator == "mul":
                     mul_value = value1 * value2
+                    new_constant = SolverConstant(mul_value, level=self.level)
                     info_logger.info(
-                        f"Multiplied {value1} with {value2} to get {mul_value}"
+                        f"Multiplied {value1} with {value2} to get {new_constant}"
                     )
                     return (
                         True,
                         True,
                         False,
-                        SolverConstant(
-                            mul_value,
-                            level=self.level,
-                        ),
+                        new_constant,
                         True,
                     )
 
                 elif self.operator == "div":
                     div_value = value1 / value2
+                    new_constant = SolverConstant(div_value, level=self.level)
+                    info_logger.info(
+                        f"Divided {value1} by {value2} to get {new_constant}"
+                    )
                     return (
                         True,
                         True,
                         False,
-                        SolverConstant(div_value, level=self.level),
+                        new_constant,
                         True,
                     )
 
                 elif self.operator == "pow":
                     pow_value = value1**value2
+                    new_constant = SolverConstant(pow_value, level=self.level)
                     info_logger.info(
-                        f"Took {value1} to the power of {value2} to get {pow_value}"
+                        f"Took {value1} to the power of {value2} to get {new_constant}"
                     )
                     return (
                         True,
                         True,
                         False,
-                        SolverConstant(pow_value, level=self.level),
+                        new_constant,
                         True,
                     )
 

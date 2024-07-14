@@ -104,6 +104,9 @@ class SolverEquation:
                     if single_rhs_updated:
                         sub_equation.rhs = single_new_rhs_exp
 
+                    rhs_updated[sub_equation_index] = single_rhs_updated
+                    rhs_solved[sub_equation_index] = single_rhs_solved
+
                     if print_update:
                         info_logger.info("Current form: " + str(sub_equation))
 
@@ -118,6 +121,9 @@ class SolverEquation:
                     if single_lhs_updated:
                         sub_equation.lhs = single_new_lhs_exp
 
+                    lhs_updated[sub_equation_index] = single_lhs_updated
+                    lhs_solved[sub_equation_index] = single_lhs_solved
+
                     if print_update:
                         info_logger.info("Current form: " + str(sub_equation))
 
@@ -125,11 +131,7 @@ class SolverEquation:
                     if single_switch_lhs_to_rhs:
                         info_logger.info("Current form: " + str(sub_equation))
 
-                    rhs_updated[sub_equation_index] = single_rhs_updated
-                    lhs_updated[sub_equation_index] = single_lhs_updated
                     switch_lhs_to_rhs[sub_equation_index] = single_switch_lhs_to_rhs
-                    rhs_solved[sub_equation_index] = single_rhs_solved
-                    lhs_solved[sub_equation_index] = single_lhs_solved
 
             if (
                 all(rhs_solved)
